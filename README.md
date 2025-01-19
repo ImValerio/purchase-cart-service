@@ -31,5 +31,5 @@ A modular approach has been followed for better code readability and maintainabi
 
 ### Testing
 
-Integration tests are available using the command (db must be running):
+Integration tests are available using the command (db must be running):\
 `docker run -v $(pwd):/mnt -p 9090:9090 -w /mnt purchase-cart-service ./scripts/test.sh`
