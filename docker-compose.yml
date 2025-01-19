@@ -16,3 +16,5 @@ services:
       POSTGRES_DB: purchase_cart_db
     ports:
       - "5432:5432"
+    volumes:
+      - ./database/migrations/:/tmp/sql_scripts
