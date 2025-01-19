@@ -4,7 +4,7 @@ services:
     ports:
       - "9090:9090"
     environment:
-      - DATABASE_URL=postgresql://user:password@db:5432/purchase_cart_db
+      - DATABASE_URL=postgresql://user:password@db:5432/purchase_cart_db?sslmode=disable
     depends_on:
       - db
 
