@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"log/slog"
+	"purchase-cart-service/errors"
 	"time"
 )
 
@@ -20,48 +21,15 @@ func (bs OrderRepository) Insert(ctx context.Context) (*int, error) {
 
 	stmt, err := bs.Db.PrepareContext(ctx, query)
 	if err != nil {
-		return nil, err
+		return nil, errors.PrintAndReturnErr(err, errors.INTERNAL_SERVER_ERROR)
 	}
 	defer stmt.Close()
 
 	err = stmt.QueryRowContext(ctx, time.Now()).Scan(orderId)
 	if err != nil {
-		return nil, err
+		return nil, errors.PrintAndReturnErr(err, errors.INTERNAL_SERVER_ERROR)
 	}
 
 	slog.Info("record inserted successfully")
 	return orderId, nil
 }
-
-// func (bs OrderRepository) GetAll(ctx context.Context) ([]models.Book, error) {
-
-// 	stmt, err := bs.Db.PrepareContext(ctx, "SELECT id, name, author, create_time FROM book")
-
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer stmt.Close()
-
-// 	rows, err := stmt.Query()
-
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer rows.Close()
-
-// 	var books []models.Book
-
-// 	for rows.Next() {
-// 		var book models.Book
-
-// 		err := rows.Scan(&book.Id, &book.Name, &book.Author, &book.CreateTime)
-
-// 		if err != nil {
-// 			return nil, err
-// 		}
-
-// 		books = append(books, book)
-// 	}
-
-// 	return books, nil
-// }

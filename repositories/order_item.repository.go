@@ -23,8 +23,7 @@ func (bs OrderItemRepository) Insert(ctx context.Context, orderId int, item mode
 	stmt, err := bs.Db.PrepareContext(ctx, query)
 
 	if err != nil {
-		slog.Error(err.Error())
-		return nil, errors.NewAPIError(http.StatusInternalServerError, "something went wrong")
+		return nil, err
 	}
 
 	defer stmt.Close()
@@ -38,8 +37,7 @@ func (bs OrderItemRepository) Insert(ctx context.Context, orderId int, item mode
 	err = stmt.QueryRowContext(ctx, orderId, item.ProductId, itemPrice, itemVAT, item.Quantity).Scan(&rv.Id, &rv.OrderId, &rv.ProductId, &rv.Price, &rv.VAT, &rv.Quantity, &rv.CreatedAt)
 
 	if err != nil {
-		slog.Error(err.Error())
-		return nil, errors.NewAPIError(http.StatusInternalServerError, "something went wrong")
+		return nil, err
 	}
 
 	slog.Info("query executed successfully")
@@ -57,7 +55,7 @@ func (bs OrderItemRepository) InsertBatch(ctx context.Context, orderId int, item
 	for i, item := range items {
 		product, ok := products[item.ProductId]
 		if !ok {
-			return nil, errors.NewAPIError(http.StatusBadRequest, fmt.Sprintf("product with ID %d not found", item.ProductId))
+			return nil, errors.PrintAndReturnErr(nil, errors.NewAPIError(http.StatusBadRequest, fmt.Sprintf("product with ID %d not found", item.ProductId)))
 		}
 
 		itemPrice := float64(item.Quantity) * product.Price
@@ -80,6 +78,7 @@ func (bs OrderItemRepository) InsertBatch(ctx context.Context, orderId int, item
 	if err != nil {
 		return nil, err
 	}
+
 	defer rows.Close()
 
 	slog.Info("query executed successfully")
@@ -90,11 +89,13 @@ func (bs OrderItemRepository) InsertBatch(ctx context.Context, orderId int, item
 		if err := rows.Scan(&rv.Id, &rv.OrderId, &rv.ProductId, &rv.Price, &rv.VAT, &rv.Quantity, &rv.CreatedAt); err != nil {
 			return nil, err
 		}
+
 		insertedItems = append(insertedItems, rv)
 	}
 
 	if err := rows.Err(); err != nil {
 		return nil, err
+
 	}
 
 	return insertedItems, nil

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"purchase-cart-service/errors"
@@ -77,12 +78,11 @@ func createRouterAndSetRoutes() *chi.Mux {
 
 func handleError(w http.ResponseWriter, err error) {
 	if apiErr, ok := err.(*errors.APIError); ok {
-		writeJSON(w, apiErr.StatusCode, apiErr.Message)
+		slog.Info("is an APIError")
+		throwError(w, apiErr.Message, apiErr.StatusCode)
 	} else {
 		// For unexpected errors, return a generic response
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{
-			"message": "internal server error",
-		})
+		slog.Error(err.Error())
+		throwError(w, "internal server error", http.StatusInternalServerError)
 	}
 }

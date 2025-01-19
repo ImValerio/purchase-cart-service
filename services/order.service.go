@@ -2,7 +2,7 @@ package services
 
 import (
 	"context"
-	"errors"
+	"purchase-cart-service/errors"
 	"purchase-cart-service/models"
 	"purchase-cart-service/repositories"
 )
@@ -13,24 +13,31 @@ type OrderService struct {
 	ProductRepo   repositories.ProductRepository
 }
 
-func (os OrderService) CreateOrder(ctx context.Context, orderRequest *models.OrderRequest) (*models.OrderResponse, error) {
+func (ordsrv OrderService) CreateOrder(ctx context.Context, orderRequest *models.OrderRequest) (*models.OrderResponse, error) {
 
 	if len(orderRequest.Order.Items) > 50 {
-		return nil, errors.New("you can order a maximum of 50 different products per request. Please reduce the number of items and try again")
+		return nil, errors.EXCEEDED_MAX_ITEM
 	}
 
-	productIds := getProductsIds(orderRequest)
-
-	products, err := os.ProductRepo.GetByIDs(ctx, productIds)
+	productIds, err := getProductsIds(orderRequest)
 	if err != nil {
 		return nil, err
+	}
+
+	products, err := ordsrv.ProductRepo.GetByIDs(ctx, productIds)
+	if err != nil {
+		return nil, errors.PrintAndReturnErr(err, errors.INTERNAL_SERVER_ERROR)
+	}
+
+	if len(products) == 0 {
+		return nil, errors.CANNOT_FIND_PRODUCTS
 	}
 
 	productMap := getProductMapByModel(products)
 
-	orderId, err := os.OrderRepo.Insert(ctx)
+	orderId, err := ordsrv.OrderRepo.Insert(ctx)
 	if err != nil {
-		return nil, err
+		return nil, errors.PrintAndReturnErr(err, errors.INTERNAL_SERVER_ERROR)
 	}
 
 	// var items []*models.OrderItem
@@ -38,7 +45,7 @@ func (os OrderService) CreateOrder(ctx context.Context, orderRequest *models.Ord
 	// 	product, ok := productMap[request.ProductId]
 
 	// 	if ok {
-	// 		item, err := os.OrderItemRepo.Insert(ctx, *orderId, request, product)
+	// 		item, err := ordsrv.OrderItemRepo.Insert(ctx, *orderId, request, product)
 	// 		if err != nil {
 	// 			return nil, err
 	// 		}
@@ -49,7 +56,7 @@ func (os OrderService) CreateOrder(ctx context.Context, orderRequest *models.Ord
 	// 	}
 	// }
 
-	items, err := os.OrderItemRepo.InsertBatch(ctx, *orderId, orderRequest.Order.Items, productMap)
+	items, err := ordsrv.OrderItemRepo.InsertBatch(ctx, *orderId, orderRequest.Order.Items, productMap)
 	if err != nil {
 		return nil, err
 	}
@@ -81,15 +88,25 @@ func (os OrderService) CreateOrder(ctx context.Context, orderRequest *models.Ord
 
 }
 
-func getProductsIds(orderRequest *models.OrderRequest) []int {
+func getProductsIds(orderRequest *models.OrderRequest) ([]int, error) {
 	var rv []int
 
+	alreadySeen := make(map[int]bool)
+
 	for _, item := range orderRequest.Order.Items {
+		if alreadySeen[item.ProductId] {
+			return nil, errors.DUPLICATE_PRODUCT_ID
+		}
+
+		if item.ProductId < 0 {
+			return nil, errors.INVALID_PRODUCT_ID
+		}
 
 		rv = append(rv, item.ProductId)
+		alreadySeen[item.ProductId] = true
 	}
 
-	return rv
+	return rv, nil
 }
 
 func getProductMapByModel(products []models.Product) map[int]models.Product {
