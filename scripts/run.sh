@@ -1,3 +1,4 @@
+#!/bin/bash
 SRC_PATH=/mnt
 APP_FILE="$SRC_PATH/app"
 

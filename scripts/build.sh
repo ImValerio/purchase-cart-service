@@ -1,3 +1,4 @@
+#!/bin/bash
 SRC_PATH=/mnt
 DEST_PATH=/mnt/app
 
