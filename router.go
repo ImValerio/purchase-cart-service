@@ -9,8 +9,8 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"purchase-cart-service/dtos"
 	"purchase-cart-service/errors"
-	"purchase-cart-service/models"
 	"purchase-cart-service/repositories"
 	"purchase-cart-service/services"
 	"time"
@@ -52,7 +52,7 @@ func createRouterAndSetRoutes() *chi.Mux {
 		ctx, cancel := context.WithTimeout(r.Context(), 1*time.Second)
 		defer cancel()
 
-		var body *models.OrderRequest
+		var body *dtos.OrderRequest
 		err = json.NewDecoder(r.Body).Decode(&body)
 		if err != nil {
 			fmt.Println(err)

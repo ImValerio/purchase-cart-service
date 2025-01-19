@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"purchase-cart-service/dtos"
 	"purchase-cart-service/errors"
 	"purchase-cart-service/models"
 	"strings"
@@ -15,7 +16,7 @@ type OrderItemRepository struct {
 	Db *sql.DB
 }
 
-func (bs OrderItemRepository) Insert(ctx context.Context, orderId int, item models.OrderItemDto, product models.Product) (*models.OrderItem, error) {
+func (bs OrderItemRepository) Insert(ctx context.Context, orderId int, item dtos.OrderItem, product models.Product) (*models.OrderItem, error) {
 
 	query := "INSERT INTO order_item (id, order_id, product_id, price, vat, quantity) VALUES (DEFAULT, $1, $2, $3, $4, $5) RETURNING id, order_id, product_id, price, vat, quantity, created_at"
 	slog.Info(query)
@@ -45,7 +46,7 @@ func (bs OrderItemRepository) Insert(ctx context.Context, orderId int, item mode
 	return rv, nil
 }
 
-func (bs OrderItemRepository) InsertBatch(ctx context.Context, orderId int, items []models.OrderItemDto, products map[int]models.Product) ([]models.OrderItem, error) {
+func (bs OrderItemRepository) InsertBatch(ctx context.Context, orderId int, items []dtos.OrderItem, products map[int]models.Product) ([]models.OrderItem, error) {
 
 	query := "INSERT INTO order_item (id, order_id, product_id, price, vat, quantity) VALUES "
 

@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"purchase-cart-service/dtos"
 	"purchase-cart-service/errors"
 	"purchase-cart-service/models"
 	"purchase-cart-service/repositories"
@@ -13,7 +14,7 @@ type OrderService struct {
 	ProductRepo   repositories.ProductRepository
 }
 
-func (ordsrv OrderService) CreateOrder(ctx context.Context, orderRequest *models.OrderRequest) (*models.OrderResponse, error) {
+func (ordsrv OrderService) CreateOrder(ctx context.Context, orderRequest *dtos.OrderRequest) (*dtos.OrderResponse, error) {
 
 	if len(orderRequest.Order.Items) > 50 {
 		return nil, errors.EXCEEDED_MAX_ITEM
@@ -61,11 +62,11 @@ func (ordsrv OrderService) CreateOrder(ctx context.Context, orderRequest *models
 		return nil, err
 	}
 
-	itemsDetail := []models.ItemDetail{}
+	itemsDetail := []dtos.ItemDetail{}
 
 	totalPrice, totalVAT := 0.0, 0.0
 	for _, item := range items {
-		var itemDetail models.ItemDetail
+		var itemDetail dtos.ItemDetail
 
 		itemDetail.Quantity = item.Quantity
 		itemDetail.ProductID = item.ProductId
@@ -77,7 +78,7 @@ func (ordsrv OrderService) CreateOrder(ctx context.Context, orderRequest *models
 		totalVAT += itemDetail.VAT
 	}
 
-	rv := &models.OrderResponse{}
+	rv := &dtos.OrderResponse{}
 
 	rv.OrderID = *orderId
 	rv.OrderPrice = totalPrice
@@ -88,7 +89,7 @@ func (ordsrv OrderService) CreateOrder(ctx context.Context, orderRequest *models
 
 }
 
-func getProductsIds(orderRequest *models.OrderRequest) ([]int, error) {
+func getProductsIds(orderRequest *dtos.OrderRequest) ([]int, error) {
 	var rv []int
 
 	alreadySeen := make(map[int]bool)
