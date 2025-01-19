@@ -78,7 +78,6 @@ func createRouterAndSetRoutes() *chi.Mux {
 
 func handleError(w http.ResponseWriter, err error) {
 	if apiErr, ok := err.(*errors.APIError); ok {
-		slog.Info("is an APIError")
 		throwError(w, apiErr.Message, apiErr.StatusCode)
 	} else {
 		// For unexpected errors, return a generic response
