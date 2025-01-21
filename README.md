@@ -33,3 +33,11 @@ A modular approach has been followed for better code readability and maintainabi
 
 Integration tests are available using the command (db must be running):\
 `docker run -v $(pwd):/mnt -p 9090:9090 -w /mnt purchase-cart-service ./scripts/test.sh`
+
+### Potential improvements
+
+- Caching Layer especially for product reads (e.g., Redis, Memcached)
+- Implement an in-memory caching solution to reduce database load and improve response times for frequently accessed product data.
+- Ensure atomicity by wrapping critical database operations in transactions to prevent partial updates in case of failures.
+- Implement a circuit breaker to handle failures gracefully and avoid cascading failures by limiting requests to failing services.
+- Rate Limiting 
