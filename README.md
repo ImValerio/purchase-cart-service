@@ -36,7 +36,6 @@ Integration tests are available using the command (db must be running):\
 
 ### Potential improvements
 
-- Caching Layer especially for product reads (e.g., Redis, Memcached)
 - Implement an in-memory caching solution to reduce database load and improve response times for frequently accessed product data.
 - Ensure atomicity by wrapping critical database operations in transactions to prevent partial updates in case of failures.
 - Implement a circuit breaker to handle failures gracefully and avoid cascading failures by limiting requests to failing services.
